@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 
 struct Node {
 	uint64_t value{};
@@ -51,6 +52,8 @@ struct Field {
 		}
 	}
 
+	~Field();
+
 	void ExpandUp();
 
 	void ExpandLeft();
@@ -59,7 +62,7 @@ struct Field {
 
 	void ExpandRight();
 
-	void Spill(uint64_t max_iter, uint64_t freq, const char* path_output);
+	void Spill(std::set<Node*>& all_spilling_nodes, std::vector<Node*>& current_spilling_nodes);
 
-	void Output(const char* path) const;
+	void Output(const std::string& path) const;
 };

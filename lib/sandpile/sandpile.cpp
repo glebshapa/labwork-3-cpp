@@ -5,6 +5,8 @@
 #include <vector>
 #include <set>
 
+Field::~Field() = default;
+
 void Field::ExpandUp() {
 	Node* new_start = new Node;
 	new_start->down = start;
@@ -83,60 +85,43 @@ void Field::ExpandRight() {
 	}
 }
 
-void Field::Spill(uint64_t max_iter, uint64_t freq, const char* path_output) {
-	std::set<Node*> all_spilling_nodes;
-	std::vector<Node*> current_spilling_nodes;
-	for (Node* temp_i = start; temp_i != nullptr; temp_i = temp_i->down) {
-		for (Node* temp_j = temp_i; temp_j != nullptr; temp_j = temp_j->right) {
-			if (temp_j->value >= 4) {
-				all_spilling_nodes.insert(temp_j);
-			}
-		}
+void Field::Spill(std::set<Node*>& all_spilling_nodes, std::vector<Node*>& current_spilling_nodes) {
+	for (auto node : all_spilling_nodes) {
+		current_spilling_nodes.emplace_back(node);
 	}
-	uint64_t iter_counter = 0;
-	while (iter_counter <= max_iter && !all_spilling_nodes.empty()) {
-		for (auto node : all_spilling_nodes) {
-			current_spilling_nodes.emplace_back(node);
-		}
-		for (auto node : current_spilling_nodes) {
-			node->value -= 4;
-			if (node->value < 4)
-				all_spilling_nodes.erase(node);
+	for (auto node : current_spilling_nodes) {
+		node->value -= 4;
+		if (node->value < 4)
+			all_spilling_nodes.erase(node);
 
-			if (node->up == nullptr)
-				ExpandUp();
-			node->up->value++;
-			if (node->up->value >= 4)
-				all_spilling_nodes.insert(node->up);
+		if (node->up == nullptr)
+			ExpandUp();
+		node->up->value++;
+		if (node->up->value >= 4)
+			all_spilling_nodes.insert(node->up);
 
-			if (node->right == nullptr)
-				ExpandRight();
-			node->right->value++;
-			if (node->right->value >= 4)
-				all_spilling_nodes.insert(node->right);
+		if (node->right == nullptr)
+			ExpandRight();
+		node->right->value++;
+		if (node->right->value >= 4)
+			all_spilling_nodes.insert(node->right);
 
-			if (node->down == nullptr)
-				ExpandDown();
-			node->down->value++;
-			if (node->down->value >= 4)
-				all_spilling_nodes.insert(node->down);
+		if (node->down == nullptr)
+			ExpandDown();
+		node->down->value++;
+		if (node->down->value >= 4)
+			all_spilling_nodes.insert(node->down);
 
-			if (node->left == nullptr)
-				ExpandLeft();
-			node->left->value++;
-			if (node->left->value >= 4)
-				all_spilling_nodes.insert(node->left);
-		}
-		iter_counter++;
-		if (freq != 0 && iter_counter % freq == 0) {
-			std::cout << iter_counter << " iterations\n";
-			Output(path_output);
-		}
-		current_spilling_nodes.clear();
+		if (node->left == nullptr)
+			ExpandLeft();
+		node->left->value++;
+		if (node->left->value >= 4)
+			all_spilling_nodes.insert(node->left);
 	}
+	current_spilling_nodes.clear();
 }
 
-void Field::Output(const char* path) const {
+void Field::Output(const std::string& path) const {
 	const Color WHITE = Color(255, 255, 255);
 	const Color GREEN = Color(0, 255, 0);
 	const Color PURPLE = Color(150, 0, 255);

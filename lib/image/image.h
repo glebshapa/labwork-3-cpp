@@ -14,15 +14,15 @@ struct Color {
 };
 
 struct Image {
-	int width;
-	int height;
+	uint16_t width;
+	uint16_t height;
 	std::vector<Color> colors;
 
-	Image(int width, int height) : width(width), height(height), colors(std::vector<Color>(width * height)) {}
+	Image(uint16_t width, uint16_t height) : width(width), height(height), colors(std::vector<Color>(width * height)) {}
 
-	Color GetColor(int x, int y) const;
+	Color GetColor(uint16_t x, uint16_t y) const;
 
-	void SetColor(const Color& color, int x, int y);
+	void SetColor(const Color& color, uint16_t x, uint16_t y);
 
-	void Export(const char* path) const;
+	void Export(const std::string& path) const;
 };
