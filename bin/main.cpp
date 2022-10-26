@@ -53,14 +53,17 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	std::vector<uint64_t> a(n * m);
+	std::vector<uint64_t> a(n * m, 0);
 
 	freopen(path_input, "r", stdin);
 
-	for (uint16_t i = 0; i < n; i++) {
-		for (uint16_t j = 0; j < m; j++) {
-			std::cin >> a[i * n + j];
-		}
+	uint16_t x;
+	uint16_t y;
+	uint64_t cnt_sand;
+
+	while (std::cin >> x) {
+		std::cin >> y >> cnt_sand;
+		a[x * n + y] = cnt_sand;
 	}
 
 	Field f(a, n, m);
@@ -81,11 +84,11 @@ int main(int argc, char* argv[]) {
 		iter_counter++;
 		if (freq != 0 && iter_counter % freq == 0) {
 			std::cout << iter_counter << " iterations\n";
-			f.Output(path_output + std::string ("image_") + std::to_string(iter_counter / freq) + std::string (".bmp"));
+			f.Output(path_output + std::string("image_") + std::to_string(iter_counter / freq) + std::string(".bmp"));
 		}
 	}
 
-	f.Output(path_output + std::string ("image_") + "final" + std::string (".bmp"));
+	f.Output(path_output + std::string("image_") + "final" + std::string(".bmp"));
 	uint end_time = clock();
 	std::cout << (end_time - start_time) / CLOCKS_PER_SEC << " secs" << '\n';
 }
