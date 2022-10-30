@@ -14,11 +14,11 @@ struct Node {
 
 struct Field {
 	Node *start = new Node;
-	int width, height;
+	uint16_t width, height;
 	std::set<Node*> all_spilling_nodes;
 	std::vector<Node*> current_spilling_nodes;
 
-	Field(std::vector<uint64_t> matrix, int height, int width) : height(height), width(width) {
+	Field(std::vector<uint64_t> matrix, uint16_t height, uint16_t width) : height(height), width(width) {
 		start->value = matrix[0];
 		Node* last = start;
 		for (int i = 1; i < height; i++) {
