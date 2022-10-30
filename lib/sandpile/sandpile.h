@@ -15,6 +15,8 @@ struct Node {
 struct Field {
 	Node *start = new Node;
 	int width, height;
+	std::set<Node*> all_spilling_nodes;
+	std::vector<Node*> current_spilling_nodes;
 
 	Field(std::vector<uint64_t> matrix, int height, int width) : height(height), width(width) {
 		start->value = matrix[0];
@@ -54,6 +56,8 @@ struct Field {
 
 	~Field();
 
+	void InitSpilling();
+
 	void ExpandUp();
 
 	void ExpandLeft();
@@ -62,7 +66,7 @@ struct Field {
 
 	void ExpandRight();
 
-	void Spill(std::set<Node*>& all_spilling_nodes, std::vector<Node*>& current_spilling_nodes);
+	void Spill();
 
 	void Output(const std::string& path) const;
 };

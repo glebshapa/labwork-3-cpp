@@ -20,6 +20,16 @@ Field::~Field() {
 	}
 };
 
+void Field::InitSpilling() {
+	for (Node* temp_i = start; temp_i != nullptr; temp_i = temp_i->down) {
+		for (Node* temp_j = temp_i; temp_j != nullptr; temp_j = temp_j->right) {
+			if (temp_j->value >= 4) {
+				all_spilling_nodes.insert(temp_j);
+			}
+		}
+	}
+}
+
 void Field::ExpandUp() {
 	Node* new_start = new Node;
 	new_start->down = start;
@@ -98,7 +108,7 @@ void Field::ExpandRight() {
 	}
 }
 
-void Field::Spill(std::set<Node*>& all_spilling_nodes, std::vector<Node*>& current_spilling_nodes) {
+void Field::Spill() {
 	for (auto node : all_spilling_nodes) {
 		current_spilling_nodes.emplace_back(node);
 	}

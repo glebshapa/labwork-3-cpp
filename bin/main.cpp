@@ -68,19 +68,11 @@ int main(int argc, char* argv[]) {
 
 	Field f(a, n, m);
 
-	std::set<Node*> all_spilling_nodes;
-	std::vector<Node*> current_spilling_nodes;
-	for (Node* temp_i = f.start; temp_i != nullptr; temp_i = temp_i->down) {
-		for (Node* temp_j = temp_i; temp_j != nullptr; temp_j = temp_j->right) {
-			if (temp_j->value >= 4) {
-				all_spilling_nodes.insert(temp_j);
-			}
-		}
-	}
+	f.InitSpilling();
 
 	uint64_t iter_counter = 0;
-	while (iter_counter <= max_iter && !all_spilling_nodes.empty()) {
-		f.Spill(all_spilling_nodes, current_spilling_nodes);
+	while (iter_counter <= max_iter && !f.all_spilling_nodes.empty()) {
+		f.Spill();
 		iter_counter++;
 		if (freq != 0 && iter_counter % freq == 0) {
 			std::cout << iter_counter << " iterations\n";
