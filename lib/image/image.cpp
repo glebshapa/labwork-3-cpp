@@ -7,14 +7,12 @@
 const uint16_t FILE_HEADER_SIZE = 14;
 const uint16_t INFORMATION_HEADER_SIZE = 40;
 
-Color Image::GetColor(uint16_t x, uint16_t y) const {
+uint8_t Image::GetColor(uint16_t x, uint16_t y) const {
 	return colors[y * width + x];
 }
 
-void Image::SetColor(const Color& color, uint16_t x, uint16_t y) {
-	colors[y * width + x].r = color.r;
-	colors[y * width + x].g = color.g;
-	colors[y * width + x].b = color.b;
+void Image::SetColor(const uint8_t& color, uint16_t x, uint16_t y) {
+	colors[y * width + x] = color;
 }
 
 void GenerateFileType(unsigned char& fileHeaderLink) {
@@ -33,7 +31,7 @@ void GenerateFileSize(unsigned char& fileHeaderLink, const uint32_t fileSize) {
 
 void GenerateFilePixelDataOffset(unsigned char& fileHeaderLink) {
 	unsigned char* fileHeader = &fileHeaderLink;
-	fileHeader[10] = FILE_HEADER_SIZE + INFORMATION_HEADER_SIZE;
+	fileHeader[10] = FILE_HEADER_SIZE + INFORMATION_HEADER_SIZE + 20;
 }
 
 void GenerateHeaderInformationSize(unsigned char& informationHeaderLink) {
@@ -60,7 +58,13 @@ void GenerateHeaderPlanes(unsigned char& informationHeaderLink) {
 
 void GenerateHeaderBitPerPixel(unsigned char& informationHeaderLink) {
 	unsigned char* informationHeader = &informationHeaderLink;
-	informationHeader[14] = 24;
+	informationHeader[14] = 4;
+}
+
+void GenerateHeaderColorsCount(unsigned char& informationHeaderLink) {
+	unsigned char* informationHeader = &informationHeaderLink;
+	informationHeader[32] = 5;
+	informationHeader[36] = 5;
 }
 
 void Image::Export(const std::string& path) const {
@@ -72,10 +76,10 @@ void Image::Export(const std::string& path) const {
 		return;
 	}
 
-	unsigned char bmpPad[3] = { 0, 0, 0 };
-	const uint32_t paddingAmount = ((4 - (width * 3) % 4) % 4);
-	const uint32_t fileSize = FILE_HEADER_SIZE + INFORMATION_HEADER_SIZE + width * height * 3 + paddingAmount * width;
-	
+	const int padding_width = ((width + 7) / 8) * 4;
+
+	const uint32_t fileSize = FILE_HEADER_SIZE + INFORMATION_HEADER_SIZE + height * padding_width;
+
 	unsigned char fileHeader[FILE_HEADER_SIZE];
 	std::memset(fileHeader, 0, FILE_HEADER_SIZE);
 
@@ -90,21 +94,26 @@ void Image::Export(const std::string& path) const {
 	GenerateHeaderInformationImageSize(*informationHeader, width, height);
 	GenerateHeaderPlanes(*informationHeader);
 	GenerateHeaderBitPerPixel(*informationHeader);
+	GenerateHeaderColorsCount(*informationHeader);
+
+	unsigned char palette[20] = {255, 255, 255, 0,
+															 0, 255, 0, 0,
+															 255, 0, 150, 0,
+															 0, 255, 255, 0,
+															 0, 0, 0, 0};
 
 	f.write(reinterpret_cast<char*>(fileHeader), FILE_HEADER_SIZE);
 	f.write(reinterpret_cast<char*>(informationHeader), INFORMATION_HEADER_SIZE);
+	f.write(reinterpret_cast<char*>(palette), 20);
 
 	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			unsigned char r = static_cast<unsigned char>(GetColor(x, y).r);
-			unsigned char g = static_cast<unsigned char>(GetColor(x, y).g);
-			unsigned char b = static_cast<unsigned char>(GetColor(x, y).b);
-
-			unsigned char color[] = { b, g, r };
-
-			f.write(reinterpret_cast<char*>(color), 3);
+		for (int x = 0; x < padding_width; x++) {
+			uint8_t pxl = GetColor(2 * x, y);
+			pxl = pxl << 4;
+			pxl += GetColor(2 * x + 1, y);
+			unsigned char color[] = { pxl };
+			f.write(reinterpret_cast<char*>(color), 1);
 		}
-		f.write(reinterpret_cast<char*>(bmpPad), paddingAmount);
 	}
 	f.close();
 }

@@ -5,7 +5,20 @@
 #include <vector>
 #include <set>
 
-Field::~Field() = default;
+Field::~Field() {
+	Node* temp_i = start;
+	while (temp_i != nullptr) {
+		Node* temp2_i = temp_i->down;
+		for (Node* temp_j = temp_i->right; temp_j != nullptr; temp_j = temp_j->right) {
+			delete temp_j->left;
+			if (temp_j->right == nullptr) {
+				delete temp_j;
+				break;
+			}
+		}
+		temp_i = temp2_i;
+	}
+};
 
 void Field::ExpandUp() {
 	Node* new_start = new Node;
@@ -122,26 +135,15 @@ void Field::Spill(std::set<Node*>& all_spilling_nodes, std::vector<Node*>& curre
 }
 
 void Field::Output(const std::string& path) const {
-	const Color WHITE = Color(255, 255, 255);
-	const Color GREEN = Color(0, 255, 0);
-	const Color PURPLE = Color(150, 0, 255);
-	const Color YELLOW = Color(255, 255, 0);
-	const Color BLACK = Color(0, 0, 0);
 	Image image(width, height);
 	int i = 0;
 	for (Node* temp_i = start; temp_i != nullptr; temp_i = temp_i->down, i++) {
 		int j = 0;
 		for (Node* temp_j = temp_i; temp_j != nullptr; temp_j = temp_j->right, j++) {
-			if (temp_j->value == 0)
-				image.SetColor(WHITE, j, i);
-			if (temp_j->value == 1)
-				image.SetColor(GREEN, j, i);
-			if (temp_j->value == 2)
-				image.SetColor(PURPLE, j, i);
-			if (temp_j->value == 3)
-				image.SetColor(YELLOW, j, i);
 			if (temp_j->value > 3)
-				image.SetColor(BLACK, j, i);
+				image.SetColor(4, j, i);
+			else
+				image.SetColor(static_cast<uint8_t>(temp_j->value), j, i);
 		}
 	}
 	image.Export(path);
